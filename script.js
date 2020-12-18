@@ -89,7 +89,7 @@ class Obstacles extends MoveObstaclase {
     this.displayWidth = window.innerWidth;
     this.obstacleTopLeft = this.displayHeiht;
     this.obstacleTopHeight = 160;
-    this.obstacleLeft = window.innerWidth ;
+    this.obstacleLeft = window.innerWidth;
     this.obstacleBottomHeight = 200;
   }
 
