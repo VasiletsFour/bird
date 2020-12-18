@@ -50,9 +50,7 @@ class Move {
     return (document.body.onkeyup = (event) =>
       event.keyCode === 32 && this.up());
   }
-}
 
-class MoveObstaclase {
   runLeft() {
     const elem = document.getElementById(this.id);
 
@@ -81,7 +79,7 @@ class Player extends Move {
   }
 }
 
-class Obstacles extends MoveObstaclase {
+class Obstacles extends Move {
   constructor(left, id) {
     super();
 
