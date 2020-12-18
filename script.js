@@ -18,7 +18,23 @@ const createPlayer = () => {
   player.setAttribute("id", "player");
 
   field.appendChild(player);
+
+  click();
 };
+
+const click = () =>
+  (document.body.onkeyup = (event) => event.keyCode === 32 && up());
+
+const up = () => {
+  playerTop -= 35;
+  player.style.top = `${playerTop}px`;
+};
+
+const down = () => {
+  playerTop += 10;
+  player.style.top = `${playerTop}px`;
+};
+  
 
 const createObstaclesWrapper = () => {
   const obstacles = document.createElement("div");
@@ -47,19 +63,8 @@ const createObstacleBottom = () => {
   obstacles.appendChild(obstacleBottom);
 };
 
-const click = () => {
-  document.body.onkeyup = (event) => event.keyCode === 32 && up();
-};
 
-const up = () => {
-  playerTop -= 35;
-  player.style.top = `${playerTop}px`;
-};
 
-const down = () => {
-  playerTop += 10;
-  player.style.top = `${playerTop}px`;
-};
 
 const gameRun = () => {
   if (run) {
@@ -115,13 +120,17 @@ const style = () => {
 };
 
 const gameOver = () => {
+  const obstacleTop = document.getElementById("obstacleTop");
+  const obstacleBottom = document.getElementById("obstacleBottom");
+  const player = document.getElementById("player");
+  
   if (
-    displayHeiht <= playerTop ||
-    0 >= playerTop ||
-    (obstacleTopLeft - 20 <= playerLeft &&
-      displayHeiht - obstacleTopHeight - obstacleBottomHeight <=
-        playerTop - obstacleBottomHeight) ||
-    (obstacleBottomLeft - 20 <= playerLeft && obstacleBottomHeight >= playerTop)
+    player.offsetTop <= 0 ||
+    0 >= displayHeiht - player.offsetTop - 26 ||
+    (obstacleTop.offsetLeft <= player.offsetLeft &&
+      player.offsetTop >= obstacleTop.offsetTop) ||
+    (obstacleBottom.offsetLeft <= player.offsetLeft &&
+      obstacleBottomHeight >= player.offsetTop)
   ) {
     run = false;
 
@@ -158,7 +167,6 @@ const gameOver = () => {
 const app = () => {
   createPlayer();
   createObstaclesWrapper();
-  click();
   style();
   gameRun();
 };
