@@ -112,8 +112,6 @@ class GameOver {
     const bottom = document.getElementById("obstacleBottom");
     const top = document.getElementById("obstacleTop");
 
-    console.log(this.player.offsetTop);
-    console.log(top.offsetTop);
     if (
       this.player.offsetTop < 0 ||
       this.displayHeiht < this.player.offsetTop + 30 ||
