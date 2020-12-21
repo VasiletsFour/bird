@@ -2,16 +2,12 @@
 
 class Player {
   static playerTop = window.innerHeight / 2 + 200;
-  #id = "player";
-
-  constructor() {
-    this.#id = "player";
-  }
+  static #id = "player";
 
   createPlayer() {
     const player = document.createElement("div");
 
-    player.setAttribute("id", this.#id);
+    player.setAttribute("id", Player.#id);
 
     return field.appendChild(player);
   }
@@ -41,6 +37,8 @@ class Move {
 }
 
 class Obstacles {
+  static obstacleBottomHeight = 460
+
   constructor() {
     this.playerTop = Player.playerTop;
     this.displayWidth = window.innerWidth;
@@ -118,7 +116,7 @@ class GameOver {
       (top.offsetLeft < this.player.offsetLeft &&
         top.offsetTop > this.player.offsetTop) ||
         (bottom.offsetLeft < this.player.offsetLeft &&
-          window.innerHeight - 460< this.player.offsetTop)
+          460 > this.player.offsetTop)
     ) {
       alert(`Game over: your scroe ${this.score}`);
     }
