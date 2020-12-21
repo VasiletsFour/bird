@@ -1,121 +1,127 @@
 "use strict";
 
-class Move {
-  up() {
-    const elem = document.getElementById(this.id);
+class Player{
+  static playerTop = window.innerHeight / 2 + 200;
+  #id = "player"
+  
+  constructor() {
+    this.#id = "player";
+  }
+  
+  createPlayer() {
+    const player = document.createElement("div");
 
-    this.playerTop -= 35;
-    elem.style.top = `${this.playerTop}px`;
+    player.setAttribute("id", this.#id);
+
+    return field.appendChild(player);
+  }
+}
+class Move{
+  constructor(){
+    this.playerTop = Player.playerTop
+    this.player = document.getElementById("player")
+  
+    this.playerClick()
   }
 
-  down() {
-    const elem = document.getElementById(this.id);
-
-    this.playerTop += 2;
-    elem.style.top = `${this.playerTop}px`;
-  }
-
-  click() {
+  playerClick() {
     return (document.body.onkeyup = (event) =>
       event.keyCode === 32 && this.up());
   }
 
-  runLeft() {
-    const elem = document.getElementById(this.id);
+  up() {    
+    this.playerTop -= 40;
+    this.player.style.top = `${this.playerTop}px`;
+  }
 
-    this.obstacleLeft -= 20;
-    elem.style.marginLeft = `${this.obstacleLeft}px`;
+   down() {
+    this.playerTop += 3;
+    this.player.style.top = `${this.playerTop}px`;
   }
 }
 
-class Player extends Move {
+
+
+class Obstacles{
   constructor() {
-    super();
-
-    this.playerTop = window.innerHeight / 2 + 200;
-    this.id = "player";
-  }
-  createPlayer() {
-    const player = document.createElement("div");
-
-    player.setAttribute("id", this.id);
-
-    return field.appendChild(player);
-  }
-
-  click() {
-    super.click();
-  }
-}
-class Obstacles extends Move {
-  constructor(left, id) {
-    super();
-
-    (this.left = left), (this.id = id);
+    this.playerTop = Player.playerTop
     this.displayWidth = window.innerWidth;
     this.obstacleTopLeft = this.displayHeiht;
-    this.obstacleTopHeight = 160;
+    this.obstacleTopHeight = 400;
     this.obstacleLeft = window.innerWidth;
-    this.obstacleBottomHeight = 200;
+    this.obstacleBottomHeight = 460;
     this.obstacleColor = "green"
+    this.player = document.getElementById("player")
+
+    
+    this.createObstacleBottom();
+    this.createObstacleTop();
   }
 
   createObstacleBottom() {
     const obstacleBottom = document.createElement("div");
 
     obstacleBottom.setAttribute("id", "obstacleBottom");
-
-    obstacleBottom.style.backgroundColor = this.obstacleColor
+    
+    obstacleBottom.style.position = "absolute"
+    obstacleBottom.style.backgroundColor = this.obstacleColor;
     obstacleBottom.style.height = `${this.obstacleBottomHeight}px`;
-    obstacleBottom.style.width = "30px";
-    obstacles.style.padding = 0;
+    obstacleBottom.style.width = "40px";
+    obstacleBottom.style.padding = 0;
     obstacleBottom.style.marginLeft = `${this.obstacleLeft - 100}px`;
 
-    obstacles.appendChild(obstacleBottom);
+    field.appendChild(obstacleBottom);
   }
 
   createObstacleTop() {
     const obstacleTop = document.createElement("div");
-
+    
     obstacleTop.setAttribute("id", "obstacleTop");
 
+    obstacleTop.style.position = "absolute";
     obstacleTop.style.backgroundColor = this.obstacleColor
     obstacleTop.style.height = `${this.obstacleTopHeight}px`;
-    obstacleTop.style.width = "30px";
-    obstacles.style.padding = 0;
+    obstacleTop.style.width = "40px";
+    obstacleTop.style.padding = 0;
     obstacleTop.style.marginLeft = `${this.obstacleLeft - 100}px`;
     obstacleTop.style.marginTop = `${
-      window.innerHeight - this.obstacleTopHeight
+      window.innerHeight - this.obstacleTopHeight 
     }px`;
 
-    obstacles.appendChild(obstacleTop);
+    field.appendChild(obstacleTop);
   }
 
-  cretateObstacles() {
-    const obstacles = document.createElement("div");
 
-    obstacles.setAttribute("id", "obstacles");
+  run(left){
+    const obstacleBottom = document.getElementById("obstacleBottom")
+    const obstacleTop = document.getElementById("obstacleTop")
 
-    obstacles.style.display = "flex";
-    obstacles.style.flexDirection = "column";
-    obstacles.style.height = "100vh";
+    this.obstacleLeft = this.obstacleLeft - left
 
-    field.appendChild(obstacles);
-
-    this.createObstacleBottom();
-    this.createObstacleTop();
+    obstacleTop.style.marginLeft = `${this.obstacleLeft}px`;
+    obstacleBottom.style.marginLeft = `${this.obstacleLeft}px`;
   }
 }
 
 class GameOver{
   constructor() {
+    
+    this.bottom = document.getElementById("obstaclesBottom")
+    this.player = document.getElementById('player')
+    this.top = document.getElementById("obstacleTop")
     this.displayHeiht = window.innerHeight;
     this.score = 0;
-    this.offsetTop = player.offsetTop;
   }
 
-  lose() {
-    if (this.offsetTop <= 0 || this.displayHeiht <= this.offsetTop + 30) {
+  lose() {  
+    const bottom = document.getElementById("obstacleBottom")
+    const top = document.getElementById("obstacleTop")
+    
+    console.log(this.player.offsetTop)
+    console.log(top.offsetTop)
+    if (this.player.offsetTop < 0 
+      || this.displayHeiht < this.player.offsetTop + 30 
+      || top.offsetLeft < this.player.offsetLeft && top.offsetTop > this.player.offsetTop) {
       alert(`Game over: your scroe ${this.score}`);
     }
   }
@@ -123,23 +129,20 @@ class GameOver{
 
 class RunGame {
   constructor() {
-    this.player = new Player();
-    this.goTop = new Obstacles(window.innerWidth - 100, "obstacleTop");
-    this.bottomGo = new Obstacles(window.innerWidth - 100, "obstacleBottom");
+    this.move = new Move()
+    this.obstacle = new Obstacles()
+    this.gameOver = new GameOver();
+        
     this.run();
   }
 
   run() {
-    this.player.createPlayer();
-    this.player.click();
-    new Obstacles().cretateObstacles();
-
     setInterval(() => {
-      this.player.down();
-      this.goTop.runLeft();
-      this.bottomGo.runLeft();
-      new GameOver().lose();
-    }, 100);
+      this.move.down()
+      this.obstacle.run(10)
+      
+      this.gameOver.lose()
+    }, 150);
   }
 }
 
@@ -150,24 +153,11 @@ class Style {
     this.player = document.getElementById("player");
     this.playerLeft = 100;
     this.playerTop = this.displayHeiht / 2 + 200;
+    
+    this.createStyle()
   }
 
   createStyle() {
-    // const marquee = document.createElement("marquee");
-    // const img = document.createElement("img");
-
-    // marquee.setAttribute("id", "marquee")
-    // marquee.setAttribute("behavior", "scroll")
-    // marquee.setAttribute("direction","left")
-    // img.setAttribute("id", "img")
-    // img.setAttribute("src", "./img/CloudBackGround.jpg");
-    // field.appendChild(marquee);
-    // marquee.appendChild(img)
-
-    obstacles.style.display = "flex";
-    obstacles.style.flexDirection = "column";
-    obstacles.style.height = "100vh";
-
     document.body.style.width = "100vw";
     document.body.style.height = "100vh";
     document.body.style.padding = 0;
@@ -178,11 +168,6 @@ class Style {
     this.field.style.height = "100%";
     this.field.style.backgroundImage = "url('./img/CloudBackGround.jpg')";
     this.field.style.display = "flex";
-
-    // img.style.position = "absolute"
-    // img.style.height = "100vh"
-    // img.style.width = "100vw"
-    // img.zIndex = "100";
 
     this.player.style.position = "absolute";
     this.player.zIndex = "10";
@@ -198,8 +183,10 @@ class Style {
 
 class App {
   constructor() {
+    new Player().createPlayer()
+    new Move()
     new RunGame();
-    new Style().createStyle();
+    new Style()
   }
 }
 
