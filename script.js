@@ -1,10 +1,56 @@
 "use strict";
 
+class Element {
+  createPlayer() {
+    const player = document.createElement("div");
+
+    player.setAttribute("id", "player");
+
+    return field.appendChild(player);
+  }
+
+  getPlaeyerId() {
+    return document.getElementById("player");
+  }
+
+  createObstacleBottom() {
+    const obstacleBottom = document.createElement("div");
+
+    obstacleBottom.setAttribute("class", "obstacleBottom");
+
+    return field.appendChild(obstacleBottom);
+  }
+
+  createObstacleTop() {
+    const obstacleTop = document.createElement("div");
+
+    obstacleTop.setAttribute("class", "obstacleTop");
+
+    return field.appendChild(obstacleTop);
+  }
+
+  getObstaclesList(className) {
+    return document.getElementsByClassName(className);
+  }
+
+  delete(px) {
+    const obstacleTopList = this.getObstaclesList("obstacleTop");
+    const obstacleBottomList = this.getObstaclesList("obstacleBottom");
+
+    for (let i = 0; i <= obstacleTopList.length - 1; i++) {
+      const pxTop = px.getIntLeft(obstacleTopList[i]);
+      const pxBottom = px.getIntLeft(obstacleBottomList[i]) - 20;
+
+      pxTop < 0 && obstacleTopList[i].remove();
+      pxBottom < 0 && obstacleBottomList[i].remove();
+    }
+  }
+}
+
 class Style {
   #field = document.getElementById("field");
-  #player = document.getElementById("player");
 
-  constructor() {
+  constructor(element) {
     this.displayHeiht = window.innerHeight;
     this.playerLeft = 100;
     this.playerTop = this.getDisplayHeight() / 2 + 200;
@@ -28,83 +74,43 @@ class Style {
     this.#field.style.height = "100%";
     this.#field.style.backgroundImage = "url('./img/CloudBackGround.jpg')";
     this.#field.style.display = "flex";
+
+    return null;
   }
 
-  createPlayerStyle() {
-    this.#player.style.position = "absolute";
-    this.#player.zIndex = "10";
-    this.#player.style.backgroundColor = this.playerColor;
-    this.#player.style.borderRadius = "100%";
-    this.#player.style.width = "30px";
-    this.#player.style.height = "30px";
-    this.#player.style.marginLeft = `${this.playerLeft}px`;
-    this.#player.style.top = `${this.playerTop}px`;
+  createPlayerStyle(player) {
+    player.style.position = "absolute";
+    player.zIndex = "10";
+    player.style.backgroundColor = this.playerColor;
+    player.style.borderRadius = "100%";
+    player.style.width = "30px";
+    player.style.height = "30px";
+    player.style.marginLeft = `${this.playerLeft}px`;
+    player.style.top = `${this.playerTop}px`;
+
+    return null;
   }
 
-  createObstacleBottomStyle() {
-    const obstaclesBottom = document.getElementsByClassName("obstacleBottom");
-    const obstacleBottom = obstaclesBottom[obstaclesBottom.length - 1];
-
-    obstacleBottom.style.position = "absolute";
-    obstacleBottom.style.backgroundColor = this.obstacleColor;
-    obstacleBottom.style.height = this.obstacleHeight;
-    obstacleBottom.style.width = "40px";
-    obstacleBottom.style.padding = 0;
-    obstacleBottom.style.marginLeft = `${1000}px`;
-    obstacleBottom.style.marginTop = `${568}px`;
+  createObstacleBottomStyle(className) {
+    className.style.position = "absolute";
+    className.style.backgroundColor = this.obstacleColor;
+    className.style.height = this.obstacleHeight;
+    className.style.width = "40px";
+    className.style.padding = 0;
+    className.style.marginLeft = `${1000}px`;
+    className.style.marginTop = `${568}px`;
   }
 
-  createObstacleTopStyle() {
-    const obstaclesTop = document.getElementsByClassName("obstacleTop");
-    const obstacleTop = obstaclesTop[obstaclesTop.length - 1];
-
-    obstacleTop.style.position = "absolute";
-    obstacleTop.style.backgroundColor = this.obstacleColor;
-    obstacleTop.style.height = this.obstacleHeight;
-    obstacleTop.style.width = "40px";
-    obstacleTop.style.padding = 0;
-    obstacleTop.style.marginLeft = `${800}px`;
-    obstacleTop.style.marginTop = `${
+  createObstacleTopStyle(className) {
+    className.style.position = "absolute";
+    className.style.backgroundColor = this.obstacleColor;
+    className.style.height = this.obstacleHeight;
+    className.style.width = "40px";
+    className.style.padding = 0;
+    className.style.marginLeft = `${800}px`;
+    className.style.marginTop = `${
       window.innerHeight - this.obstacleTopHeight
     }px`;
-  }
-}
-
-class Element {
-  #style = new Style();
-
-  createPlayer() {
-    const player = document.createElement("div");
-
-    player.setAttribute("id", "player");
-
-    return field.appendChild(player);
-  }
-
-  getPlaeyerId() {
-    return document.getElementById("player");
-  }
-
-  createObstacleBottom() {
-    const obstacleBottom = document.createElement("div");
-
-    obstacleBottom.setAttribute("class", "obstacleBottom");
-    field.appendChild(obstacleBottom);
-
-    return this.#style.createObstacleBottomStyle();
-  }
-
-  createObstacleTop() {
-    const obstacleTop = document.createElement("div");
-
-    obstacleTop.setAttribute("class", "obstacleTop");
-    field.appendChild(obstacleTop);
-
-    return this.#style.createObstacleTopStyle();
-  }
-
-  getObstaclesList(className) {
-    return document.getElementsByClassName(className);
   }
 }
 
@@ -125,135 +131,124 @@ class Px {
 }
 
 class Move {
-  #element = new Element();
   #px = new Px();
-  #player = this.#element.getPlaeyerId();
-  #obstacleTop = this.#element.getObstaclesList("obstacleTop");
-  #obstacleBottom = this.#element.getObstaclesList("obstacleBottom");
 
-  constructor() {
-    this.top = this.#px.getIntTop(this.#player);
-
-    this.playerClick();
+  constructor(player) {
+    this.player = player;
   }
 
-  playerClick() {
+  onClick() {
     return (document.body.onkeyup = (event) =>
-      event.keyCode === 32 && this.up());
+      event.keyCode === 32 && this.#up());
   }
 
-  up() {
-    this.top -= 40;
-    this.#player.style.top = `${this.top}px`;
+  #up() {
+    const top = this.#px.getIntTop(player) - 40;
+
+    return (player.style.top = `${top}px`);
   }
 
   down() {
-    this.top += 3;
-    this.#player.style.top = `${this.top}px`;
+    const top = this.#px.getIntTop(player) + 8;
+
+    return (player.style.top = `${top}px`);
   }
 
-  left() {
-    for (let i = 0; i <= this.#obstacleTop.length - 1; i++) {
-      let pxTop = this.#px.getIntLeft(this.#obstacleTop[i]) - 20;
-      let pxBottom = this.#px.getIntLeft(this.#obstacleBottom[i]) - 20;
+  left(obstacleTop, obstacleBottom) {
+    for (let i = 0; i <= obstacleTop.length - 1; i++) {
+      let pxTop = this.#px.getIntLeft(obstacleTop[i]) - 20;
+      let pxBottom = this.#px.getIntLeft(obstacleBottom[i]) - 20;
 
-      this.#obstacleTop[i].style.marginLeft = `${pxTop}px`;
-      this.#obstacleBottom[i].style.marginLeft = `${pxBottom}px`;
-    }
-  }
-}
-
-class DelEl {
-  #element = new Element();
-  #px = new Px();
-  #obstacleTop = this.#element.getObstaclesList("obstacleTop");
-  #obstacleBottom = this.#element.getObstaclesList("obstacleBottom");
-
-  delete() {
-    for (let i = 0; i <= this.#obstacleTop.length - 1; i++) {
-      let pxTop = this.#px.getIntLeft(this.#obstacleTop[i]);
-      let pxBottom = this.#px.getIntLeft(this.#obstacleBottom[i]) - 20;
-
-      pxTop < 0 && this.#obstacleTop[i].remove();
-      pxBottom < 0 && this.#obstacleBottom[i].remove();
+      obstacleTop[i].style.marginLeft = `${pxTop}px`;
+      obstacleBottom[i].style.marginLeft = `${pxBottom}px`;
     }
   }
 }
 
 class GameOver {
-  #element = new Element();
-  #player = this.#element.getPlaeyerId();
-
-  constructor() {
+  constructor(player) {
     this.score = 0;
   }
 
-  getFirstElement(className) {
-    const list = this.#element.getObstaclesList(className);
+  #getFirstElement(element) {
+    const list = element;
 
     return list[0]?.offsetLeft > 60 ? list[0] : list[1];
   }
 
-  getScore() {
-    const top = this.getFirstElement("obstacleTop");
-    const bottom = this.getFirstElement("obstacleBottom");
-
+  getScore(obstacleBottom, obstacleTop) {
+    const top = this.#getFirstElement(obstacleTop);
+    const bottom = this.#getFirstElement(obstacleBottom);
+      
     if (
-      top?.offsetLeft < this.#player.offsetLeft ||
-      bottom?.offsetLeft < this.#player.offsetLeft
+      top?.offsetLeft < player.offsetLeft ||
+      bottom?.offsetLeft < player.offsetLeft
     ) {
       this.score += 1;
     }
   }
 
-  lose() {
-    const top = this.getFirstElement("obstacleTop");
-    const bottom = this.getFirstElement("obstacleBottom");
-
+  lose(displayHeight, obstacleBottom, obstacleTop) {
+    const top = this.#getFirstElement(obstacleTop);
+    const bottom = this.#getFirstElement(obstacleBottom  );
+    console.log(bottom?.offsetLeft,player.offsetLeft)
     if (
-      this.#player.offsetTop < 0 ||
-      this.displayHeiht < this.#player.offsetTop + 30 ||
-      (top?.offsetLeft <= this.#player.offsetLeft &&
-        top?.offsetTop + 400 >= this.#player.offsetTop) ||
-      (bottom?.offsetLeft <= this.#player.offsetLeft &&
-        bottom?.offsetTop - 15 <= this.#player.offsetTop)
+      player.offsetTop < 10 ||
+      displayHeight < player.offsetTop + 27 ||
+      (top?.offsetLeft <= player.offsetLeft &&
+        top?.offsetTop + 400 >= player.offsetTop) ||
+      (bottom?.offsetLeft <= player.offsetLeft &&
+        bottom?.offsetTop - 15 <= player.offsetTop)   
     ) {
-      alert(`Game over: your scroe ${this.score}`);
+      return true;
     }
   }
 }
-
-class RunGame {
+class App {
   constructor() {
-    this.createEl = new Element();
-    this.move = new Move();
-    this.gameOver = new GameOver();
-    this.del = new DelEl();
+    this.stop = true;
+    this.style = new Style();
+    this.element = new Element(this.style);
+    this.move = new Move(this.element.getPlaeyerId());
+    this.gameOver = new GameOver(this.element.getPlaeyerId());
+    this.px = new Px();
   }
 
   run() {
-    setInterval(() => {
-      this.createEl.createObstacleTop();
-      this.createEl.createObstacleBottom();
+    this.style.createStyle();
+    this.element.createPlayer();
+    this.style.createPlayerStyle(this.element.getPlaeyerId());
+    this.move.onClick();
+
+    const firstInter = setInterval(() => {
+      const top = this.element.createObstacleTop();
+      const bottom = this.element.createObstacleBottom();
+      this.style.createObstacleBottomStyle(bottom);
+      this.style.createObstacleTopStyle(top);
     }, 3000);
 
-    setInterval(() => {
-      this.move.left();
-      this.del.delete();
+    const secondInter = setInterval(() => {
+      const topList = this.element.getObstaclesList("obstacleTop");
+      const bottomList = this.element.getObstaclesList("obstacleBottom");
+      const stop = this.gameOver.lose(this.style.getDisplayHeight(), bottomList, topList);
+
+      this.move.left(topList, bottomList);
+      this.element.delete(this.px);
       this.move.down();
-      this.gameOver.lose();
-      this.gameOver.getScore();
+      !stop && this.gameOver.getScore(bottomList, topList);
+
+      if (stop) {
+        this.stop = !stop;
+        stopFirst();
+        stopSecond();
+
+        alert(`Your Score:${this.gameOver.score}`);
+      }
     }, 150);
+
+    const stopFirst = () => clearInterval(firstInter);
+    const stopSecond = () => clearInterval(secondInter);
   }
 }
 
-class App {
-  constructor() {
-    new Style().createStyle();
-    new Element().createPlayer();
-    new Style().createPlayerStyle();
-    new RunGame().run();
-  }
-}
-
-new App();
+new App().run();
