@@ -1,9 +1,19 @@
 "use strict";
 
 class Element {
-  createPlayer() {
-    const player = document.createElement("div");
+  #createElement(src){
+    const img = document.createElement("img")
+    const element = document.createElement("div")
 
+    img.setAttribute("src", src)
+    element.appendChild(img)
+
+    return element
+  }
+
+  createPlayer() {
+    const player =this.#createElement("./img/logo.png")
+    
     player.setAttribute("id", "player");
 
     return field.appendChild(player);
@@ -14,7 +24,7 @@ class Element {
   }
 
   createObstacleBottom() {
-    const obstacleBottom = document.createElement("div");
+    const obstacleBottom =this.#createElement("./img/pipes.png")
 
     obstacleBottom.setAttribute("class", "obstacleBottom");
 
@@ -22,7 +32,7 @@ class Element {
   }
 
   createObstacleTop() {
-    const obstacleTop = document.createElement("div");
+    const obstacleTop = this.#createElement("./img/pipes.png")
 
     obstacleTop.setAttribute("class", "obstacleTop");
 
@@ -50,7 +60,7 @@ class Element {
 class Style {
   #field = document.getElementById("field");
 
-  constructor(element) {
+  constructor(player) {
     this.displayHeiht = window.innerHeight;
     this.playerLeft = 100;
     this.playerTop = this.getDisplayHeight() / 2 + 200;
@@ -72,15 +82,16 @@ class Style {
     this.#field.style.position = "realiteve";
     this.#field.style.width = "100%";
     this.#field.style.height = "100%";
-    this.#field.style.backgroundImage = "url('./img/CloudBackGround.jpg')";
+    this.#field.style.backgroundImage = "url('./img/sky.jpg')";
     this.#field.style.display = "flex";
 
     return null;
   }
 
-  createPlayerStyle(player) {
+  createPlayerStyle() {
     player.style.position = "absolute";
     player.zIndex = "10";
+    player.style.transform = `rotate(0.02turn)`;  
     player.style.backgroundColor = this.playerColor;
     player.style.borderRadius = "100%";
     player.style.width = "30px";
@@ -90,7 +101,7 @@ class Style {
 
     return null;
   }
-
+  
   createObstacleBottomStyle(className) {
     className.style.position = "absolute";
     className.style.backgroundColor = this.obstacleColor;
@@ -99,6 +110,8 @@ class Style {
     className.style.padding = 0;
     className.style.marginLeft = `${1000}px`;
     className.style.marginTop = `${568}px`;
+
+    return null
   }
 
   createObstacleTopStyle(className) {
@@ -111,6 +124,8 @@ class Style {
     className.style.marginTop = `${
       window.innerHeight - this.obstacleTopHeight
     }px`;
+
+    return null
   }
 }
 
@@ -139,7 +154,7 @@ class Move {
 
   onClick() {
     return (document.body.onkeyup = (event) =>
-      event.keyCode === 32 && this.#up());
+      event.keyCode === 32 && this.#up())
   }
 
   #up() {
@@ -191,7 +206,7 @@ class GameOver {
   lose(displayHeight, obstacleBottom, obstacleTop) {
     const top = this.#getFirstElement(obstacleTop);
     const bottom = this.#getFirstElement(obstacleBottom  );
-    console.log(bottom?.offsetLeft,player.offsetLeft)
+    
     if (
       player.offsetTop < 10 ||
       displayHeight < player.offsetTop + 27 ||
@@ -207,8 +222,8 @@ class GameOver {
 class App {
   constructor() {
     this.stop = true;
-    this.style = new Style();
-    this.element = new Element(this.style);
+    this.element = new Element();
+    this.style = new Style(this.element.getPlaeyerId());
     this.move = new Move(this.element.getPlaeyerId());
     this.gameOver = new GameOver(this.element.getPlaeyerId());
     this.px = new Px();
@@ -234,7 +249,9 @@ class App {
 
       this.move.left(topList, bottomList);
       this.element.delete(this.px);
+      
       this.move.down();
+      
       !stop && this.gameOver.getScore(bottomList, topList);
 
       if (stop) {
