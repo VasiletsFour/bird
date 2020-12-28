@@ -1,18 +1,24 @@
 "use strict";
 
 class Element {
-  #createElement(src){
+  createElement(src){
     const img = document.createElement("img")
     const element = document.createElement("div")
 
+    img.style.width = "100%"
+    img.style.height = "100%"
+
     img.setAttribute("src", src)
+   
     element.appendChild(img)
 
     return element
   }
+}
 
+class Player extends Element{
   createPlayer() {
-    const player =this.#createElement("./img/logo.png")
+    const player =this.createElement("./img/RedBird.png")
     
     player.setAttribute("id", "player");
 
@@ -22,37 +28,34 @@ class Element {
   getPlaeyerId() {
     return document.getElementById("player");
   }
+}
 
-  createObstacleBottom() {
-    const obstacleBottom =this.#createElement("./img/pipes.png")
+class Obstacles extends Element{
+  constructor(className){
+    super()
 
-    obstacleBottom.setAttribute("class", "obstacleBottom");
-
-    return field.appendChild(obstacleBottom);
+    this.className = className
   }
 
-  createObstacleTop() {
-    const obstacleTop = this.#createElement("./img/pipes.png")
+  createObstacle() {
+    const obstacle = this.createElement("./img/pipe.png")
 
-    obstacleTop.setAttribute("class", "obstacleTop");
+    obstacle.setAttribute("class", this.className);
 
-    return field.appendChild(obstacleTop);
+    return field.appendChild(obstacle);
   }
 
-  getObstaclesList(className) {
-    return document.getElementsByClassName(className);
+  getObstaclesList() {
+    return document.getElementsByClassName(this.className);
   }
 
   delete(px) {
-    const obstacleTopList = this.getObstaclesList("obstacleTop");
-    const obstacleBottomList = this.getObstaclesList("obstacleBottom");
+    const obstacleList = this.getObstaclesList(this.className);
 
-    for (let i = 0; i <= obstacleTopList.length - 1; i++) {
-      const pxTop = px.getIntLeft(obstacleTopList[i]);
-      const pxBottom = px.getIntLeft(obstacleBottomList[i]) - 20;
-
-      pxTop < 0 && obstacleTopList[i].remove();
-      pxBottom < 0 && obstacleBottomList[i].remove();
+    for (let i = 0; i <= obstacleList.length - 1; i++) {
+      const pxObstcle = px.getIntLeft(obstacleList[i]);
+  
+      pxObstcle < 0 && obstacleList[i].remove();
     }
   }
 }
@@ -64,9 +67,7 @@ class Style {
     this.displayHeiht = window.innerHeight;
     this.playerLeft = 100;
     this.playerTop = this.getDisplayHeight() / 2 + 200;
-    this.obstacleColor = "green";
-    this.playerColor = "red";
-    this.obstacleHeight = "400px";
+    this.obstacleHeight = "200px";
   }
 
   getDisplayHeight() {
@@ -91,8 +92,7 @@ class Style {
   createPlayerStyle() {
     player.style.position = "absolute";
     player.zIndex = "10";
-    player.style.transform = `rotate(0.02turn)`;  
-    player.style.backgroundColor = this.playerColor;
+    player.style.transform = `rotate(0.0turn)`;  
     player.style.borderRadius = "100%";
     player.style.width = "30px";
     player.style.height = "30px";
@@ -104,19 +104,18 @@ class Style {
   
   createObstacleBottomStyle(className) {
     className.style.position = "absolute";
-    className.style.backgroundColor = this.obstacleColor;
     className.style.height = this.obstacleHeight;
     className.style.width = "40px";
     className.style.padding = 0;
     className.style.marginLeft = `${1000}px`;
-    className.style.marginTop = `${568}px`;
+    className.style.marginTop = `${418}px`;
 
     return null
   }
 
   createObstacleTopStyle(className) {
+    className.style.transform = `rotate(0.5turn)`;  
     className.style.position = "absolute";
-    className.style.backgroundColor = this.obstacleColor;
     className.style.height = this.obstacleHeight;
     className.style.width = "40px";
     className.style.padding = 0;
@@ -222,33 +221,37 @@ class GameOver {
 class App {
   constructor() {
     this.stop = true;
-    this.element = new Element();
-    this.style = new Style(this.element.getPlaeyerId());
-    this.move = new Move(this.element.getPlaeyerId());
-    this.gameOver = new GameOver(this.element.getPlaeyerId());
+    this.player = new Player();
+    this.obstacleTop = new Obstacles("obstacleTop")
+    this.obstacleBottom = new Obstacles("obstacleBottom")
+    this.style = new Style(this.player.getPlaeyerId());
+    this.move = new Move(this.player.getPlaeyerId());
+    this.gameOver = new GameOver(this.player.getPlaeyerId());
     this.px = new Px();
   }
 
   run() {
     this.style.createStyle();
-    this.element.createPlayer();
-    this.style.createPlayerStyle(this.element.getPlaeyerId());
+    this.player.createPlayer();
+    this.style.createPlayerStyle(this.player.getPlaeyerId());
     this.move.onClick();
 
     const firstInter = setInterval(() => {
-      const top = this.element.createObstacleTop();
-      const bottom = this.element.createObstacleBottom();
+      const top = this.obstacleTop.createObstacle();
+      const bottom = this.obstacleBottom.createObstacle();
+
       this.style.createObstacleBottomStyle(bottom);
       this.style.createObstacleTopStyle(top);
     }, 3000);
 
     const secondInter = setInterval(() => {
-      const topList = this.element.getObstaclesList("obstacleTop");
-      const bottomList = this.element.getObstaclesList("obstacleBottom");
+      const topList = this.obstacleTop.getObstaclesList();
+      const bottomList = this.obstacleBottom.getObstaclesList();
       const stop = this.gameOver.lose(this.style.getDisplayHeight(), bottomList, topList);
-
+      
       this.move.left(topList, bottomList);
-      this.element.delete(this.px);
+      this.obstacleTop.delete(this.px);
+      this.obstacleBottom.delete(this.px);
       
       this.move.down();
       
