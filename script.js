@@ -123,6 +123,7 @@ class Px {
     return Number(topStr);
   }
 }
+
 class Move {
   #element = new Element();
   #px = new Px();
