@@ -63,11 +63,11 @@ class Obstacles extends Element {
 class Style {
   #field = document.getElementById("field");
 
-  constructor(player) {
-    this.displayHeiht = window.innerHeight;
+  constructor() {
+    this.obstacleHeight = this.getDisplayHeight()/2-100;
     this.playerLeft = 100;
     this.playerTop = this.getDisplayHeight() / 2;
-    this.marginLeftObstacle = `${this.#getDisplayWidth() - 100}px`;
+    this.marginLeftObstacle = this.#getDisplayWidth() - 100;
   }
 
   getDisplayHeight() {
@@ -98,30 +98,30 @@ class Style {
     player.zIndex = "10";
     player.style.transform = `rotate(0.0turn)`;
     player.style.borderRadius = "100%";
-    player.style.width = "50px";
-    player.style.height = "50px";
+    player.style.width = "60px";
+    player.style.height = "60px";
     player.style.marginLeft = `${this.playerLeft}px`;
     player.style.top = `${this.playerTop}px`;
 
     return null;
   }
 
-  createObstacleBottomStyle(className) {
+  createObstacleBottomStyle(className, height=0, left=0) {
     className.style.position = "absolute";
-    className.style.height = this.obstacleHeight;
+    className.style.height = `${this.obstacleHeight + height}px`;
     className.style.width = "80px";
-    className.style.marginLeft = this.marginLeftObstacle;
+    className.style.marginLeft = `${this.marginLeftObstacle + left}px`;
     className.style.bottom = 0;
 
     return null;
   }
 
-  createObstacleTopStyle(className) {
+  createObstacleTopStyle(className, height=0, left=0) {
     className.style.transform = `rotate(0.5turn)`;
     className.style.position = "absolute";
-    className.style.height = this.obstacleHeight;
+    className.style.height = `${this.obstacleHeight + height}px`;
     className.style.width = "70px";
-    className.style.marginLeft = this.marginLeftObstacle;
+    className.style.marginLeft = `${this.marginLeftObstacle + left}px`;
 
     return null;
   }
@@ -226,7 +226,6 @@ class RandomInt {
 
 class Storage {
   getLocalStorage(score) {
-    debugger;
     let bestScore = Number(localStorage.getItem("myScore"));
 
     if (bestScore < score) {
@@ -237,18 +236,35 @@ class Storage {
     return bestScore;
   }
 }
+
+class Level {
+  getLevel(score) {
+    let level = 1;
+
+    switch (score) {
+      case score > 10:
+        level = 2;
+        break;
+      case score > 20:
+        level = 2;
+    }
+
+    return level;
+  }
+}
 class App {
   constructor() {
     this.stop = true;
     this.player = new Player();
     this.obstacleTop = new Obstacles("obstacleTop");
     this.obstacleBottom = new Obstacles("obstacleBottom");
-    this.style = new Style(this.player.getPlaeyerId());
+    this.style = new Style();
     this.move = new Move(this.player.getPlaeyerId());
     this.gameOver = new GameOver(this.player.getPlaeyerId());
     this.px = new Px();
     this.random = new RandomInt();
     this.storage = new Storage();
+    this.level = new Level()
   }
 
   run() {
@@ -258,12 +274,45 @@ class App {
     this.move.onClick();
 
     const firstInter = setInterval(() => {
-      const getRandom = this.random.getRandom(400, 500);
+      const level = this.level.getLevel(this.gameOver.score)
+      
+      let maxHeight
+      let minHeight
+      let maxLeft
+      let minLeft
+      
+      if(level ===1){
+        maxHeight = 50
+        minHeight = 10
+        minLeft = 10
+        maxLeft = 50
+      }
+
+      if(level==2){
+        maxHeight = 70
+        minHeight = 40
+        minLeft = 0
+        maxLeft = 30
+      }
+
+      if(level ===3){
+        maxHeight = 80
+        minHeight = 70
+        minLeft = 10
+        maxLeft = 20
+      }
+
+      
+      const getRandomTopHeight = this.random.getRandom(minHeight, maxHeight);
+      const getRandomBottomHeight = this.random.getRandom(minHeight, maxHeight);
+      const getRandomTopLeft = this.random.getRandom(minLeft, maxLeft);
+      const getRandomBottomLeft = this.random.getRandom(minLeft, maxLeft);
+  
       const top = this.obstacleTop.createObstacle();
       const bottom = this.obstacleBottom.createObstacle();
 
-      this.style.createObstacleBottomStyle(bottom);
-      this.style.createObstacleTopStyle(top);
+      this.style.createObstacleBottomStyle(bottom, getRandomTopHeight, getRandomTopLeft);
+      this.style.createObstacleTopStyle(top, getRandomBottomHeight, getRandomBottomLeft);
     }, 5000);
 
     const secondInter = setInterval(() => {
