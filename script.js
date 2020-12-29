@@ -1,25 +1,25 @@
 "use strict";
 
 class Element {
-  createElement(src){
-    const img = document.createElement("img")
-    const element = document.createElement("div")
+  createElement(src) {
+    const img = document.createElement("img");
+    const element = document.createElement("div");
 
-    img.style.width = "100%"
-    img.style.height = "100%"
+    img.style.width = "100%";
+    img.style.height = "100%";
 
-    img.setAttribute("src", src)
-   
-    element.appendChild(img)
+    img.setAttribute("src", src);
 
-    return element
+    element.appendChild(img);
+
+    return element;
   }
 }
 
-class Player extends Element{
+class Player extends Element {
   createPlayer() {
-    const player =this.createElement("./img/RedBird.png")
-    
+    const player = this.createElement("./img/RedBird.png");
+
     player.setAttribute("id", "player");
 
     return field.appendChild(player);
@@ -30,15 +30,15 @@ class Player extends Element{
   }
 }
 
-class Obstacles extends Element{
-  constructor(className){
-    super()
+class Obstacles extends Element {
+  constructor(className) {
+    super();
 
-    this.className = className
+    this.className = className;
   }
 
   createObstacle() {
-    const obstacle = this.createElement("./img/pipe.png")
+    const obstacle = this.createElement("./img/pipe.png");
 
     obstacle.setAttribute("class", this.className);
 
@@ -54,7 +54,7 @@ class Obstacles extends Element{
 
     for (let i = 0; i <= obstacleList.length - 1; i++) {
       const pxObstcle = px.getIntLeft(obstacleList[i]);
-  
+
       pxObstcle < 0 && obstacleList[i].remove();
     }
   }
@@ -66,12 +66,16 @@ class Style {
   constructor(player) {
     this.displayHeiht = window.innerHeight;
     this.playerLeft = 100;
-    this.playerTop = this.getDisplayHeight() / 2 + 200;
-    this.obstacleHeight = "200px";
+    this.playerTop = this.getDisplayHeight() / 2;
+    this.marginLeftObstacle = `${this.#getDisplayWidth() - 100}px`;
   }
 
   getDisplayHeight() {
     return window.innerHeight;
+  }
+
+  #getDisplayWidth() {
+    return window.innerWidth;
   }
 
   createStyle() {
@@ -92,39 +96,34 @@ class Style {
   createPlayerStyle() {
     player.style.position = "absolute";
     player.zIndex = "10";
-    player.style.transform = `rotate(0.0turn)`;  
+    player.style.transform = `rotate(0.0turn)`;
     player.style.borderRadius = "100%";
-    player.style.width = "30px";
-    player.style.height = "30px";
+    player.style.width = "50px";
+    player.style.height = "50px";
     player.style.marginLeft = `${this.playerLeft}px`;
     player.style.top = `${this.playerTop}px`;
 
     return null;
   }
-  
+
   createObstacleBottomStyle(className) {
     className.style.position = "absolute";
     className.style.height = this.obstacleHeight;
-    className.style.width = "40px";
-    className.style.padding = 0;
-    className.style.marginLeft = `${1000}px`;
-    className.style.marginTop = `${418}px`;
+    className.style.width = "80px";
+    className.style.marginLeft = this.marginLeftObstacle;
+    className.style.bottom = 0;
 
-    return null
+    return null;
   }
 
   createObstacleTopStyle(className) {
-    className.style.transform = `rotate(0.5turn)`;  
+    className.style.transform = `rotate(0.5turn)`;
     className.style.position = "absolute";
     className.style.height = this.obstacleHeight;
-    className.style.width = "40px";
-    className.style.padding = 0;
-    className.style.marginLeft = `${800}px`;
-    className.style.marginTop = `${
-      window.innerHeight - this.obstacleTopHeight
-    }px`;
+    className.style.width = "70px";
+    className.style.marginLeft = this.marginLeftObstacle;
 
-    return null
+    return null;
   }
 }
 
@@ -153,7 +152,7 @@ class Move {
 
   onClick() {
     return (document.body.onkeyup = (event) =>
-      event.keyCode === 32 && this.#up())
+      event.keyCode === 32 && this.#up());
   }
 
   #up() {
@@ -193,7 +192,7 @@ class GameOver {
   getScore(obstacleBottom, obstacleTop) {
     const top = this.#getFirstElement(obstacleTop);
     const bottom = this.#getFirstElement(obstacleBottom);
-      
+
     if (
       top?.offsetLeft < player.offsetLeft ||
       bottom?.offsetLeft < player.offsetLeft
@@ -204,30 +203,52 @@ class GameOver {
 
   lose(displayHeight, obstacleBottom, obstacleTop) {
     const top = this.#getFirstElement(obstacleTop);
-    const bottom = this.#getFirstElement(obstacleBottom  );
-    
+    const bottom = this.#getFirstElement(obstacleBottom);
+
     if (
       player.offsetTop < 10 ||
       displayHeight < player.offsetTop + 27 ||
       (top?.offsetLeft <= player.offsetLeft &&
-        top?.offsetTop + 400 >= player.offsetTop) ||
+        top?.offsetTop + 200 >= player.offsetTop) ||
       (bottom?.offsetLeft <= player.offsetLeft &&
-        bottom?.offsetTop - 15 <= player.offsetTop)   
+        bottom?.offsetTop - 15 <= player.offsetTop)
     ) {
       return true;
     }
+  }
+}
+
+class RandomInt {
+  getRandom(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+}
+
+class Storage {
+  getLocalStorage(score) {
+    debugger;
+    let bestScore = Number(localStorage.getItem("myScore"));
+
+    if (bestScore < score) {
+      bestScore = score;
+      localStorage.setItem("myScore", score);
+    }
+
+    return bestScore;
   }
 }
 class App {
   constructor() {
     this.stop = true;
     this.player = new Player();
-    this.obstacleTop = new Obstacles("obstacleTop")
-    this.obstacleBottom = new Obstacles("obstacleBottom")
+    this.obstacleTop = new Obstacles("obstacleTop");
+    this.obstacleBottom = new Obstacles("obstacleBottom");
     this.style = new Style(this.player.getPlaeyerId());
     this.move = new Move(this.player.getPlaeyerId());
     this.gameOver = new GameOver(this.player.getPlaeyerId());
     this.px = new Px();
+    this.random = new RandomInt();
+    this.storage = new Storage();
   }
 
   run() {
@@ -237,24 +258,29 @@ class App {
     this.move.onClick();
 
     const firstInter = setInterval(() => {
+      const getRandom = this.random.getRandom(400, 500);
       const top = this.obstacleTop.createObstacle();
       const bottom = this.obstacleBottom.createObstacle();
 
       this.style.createObstacleBottomStyle(bottom);
       this.style.createObstacleTopStyle(top);
-    }, 3000);
+    }, 5000);
 
     const secondInter = setInterval(() => {
       const topList = this.obstacleTop.getObstaclesList();
       const bottomList = this.obstacleBottom.getObstaclesList();
-      const stop = this.gameOver.lose(this.style.getDisplayHeight(), bottomList, topList);
-      
+      const stop = this.gameOver.lose(
+        this.style.getDisplayHeight(),
+        bottomList,
+        topList
+      );
+
       this.move.left(topList, bottomList);
       this.obstacleTop.delete(this.px);
       this.obstacleBottom.delete(this.px);
-      
+
       this.move.down();
-      
+
       !stop && this.gameOver.getScore(bottomList, topList);
 
       if (stop) {
@@ -262,7 +288,9 @@ class App {
         stopFirst();
         stopSecond();
 
-        alert(`Your Score:${this.gameOver.score}`);
+        const bestScore = this.storage.getLocalStorage(this.gameOver.score);
+
+        alert(`Your Score:${this.gameOver.score}, best Score:${bestScore}`);
       }
     }, 150);
 
